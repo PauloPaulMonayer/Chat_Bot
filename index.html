@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="he">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chat App</title>
+    <style>
+      body {
+        background: linear-gradient(
+          to right,
+          #ff9966,
+          #ff5e62
+        ); /* גרדיאנט צבעוני */
+        color: white; /* טקסט לבן שמתאים לצבעים חיים */
+        font-family: "Arial", sans-serif;
+        margin: 0;
+        padding: 0;
+      }
+
+      #chat-container {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        background-color: rgba(255, 255, 255, 0.8);
+      }
+
+      #messages {
+        list-style: none;
+        padding: 20px;
+        margin: 0;
+        flex-grow: 1;
+        overflow-y: scroll;
+        background-color: #f5f5f5;
+      }
+
+      #messages li {
+        background-color: #ffcccb;
+        padding: 10px;
+        margin-bottom: 10px;
+        border-radius: 10px;
+      }
+
+      #form {
+        display: flex;
+        padding: 20px;
+        background-color: #ffecb3;
+      }
+
+      #input,
+      #user {
+        flex-grow: 1;
+        padding: 10px;
+        margin-right: 10px;
+        border: none;
+        border-radius: 5px;
+      }
+
+      #input:focus,
+      #user:focus {
+        outline: none;
+        box-shadow: 0 0 10px rgba(255, 105, 135, 0.5);
+      }
+
+      button {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        background-color: #ff4081;
+        color: white;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background-color: #f50057;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="chat-container">
+      <ul id="messages"></ul>
+      <form id="form" action="">
+        <input id="user" autocomplete="off" placeholder="Your Name" />
+        <input id="input" autocomplete="off" placeholder="Type a message..." />
+        <button>Send</button>
+      </form>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      var socket = io();
+
+      socket.on("output-messages", function (messages) {
+        messages.forEach(function (msg) {
+          var item = document.createElement("li");
+          item.textContent = `${msg.user}: ${msg.message}`;
+          document.querySelector("#messages").appendChild(item);
+        });
+      });
+
+      document.querySelector("#form").addEventListener("submit", function (e) {
+        e.preventDefault();
+        var user = document.querySelector("#user").value;
+        var input = document.querySelector("#input").value;
+
+        if (!user || !input) return;
+
+        socket.emit("chat message", { user: user, message: input });
+        document.querySelector("#input").value = "";
+      });
+
+      socket.on("chat message", function (msg) {
+        var item = document.createElement("li");
+        item.textContent = `${msg.user}: ${msg.message}`;
+        document.querySelector("#messages").appendChild(item);
+      });
+    </script>
+  </body>
+</html>
